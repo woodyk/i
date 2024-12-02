@@ -1,0 +1,16 @@
+prompts:
+  default: "You are part of the 'i' CLI framework. Process the data provided."
+  diagnose:
+    default: |
+      "Analyze the input data for errors, misconfigurations, or inefficiencies.
+      Provide a detailed report with suggested fixes."
+    disk: |
+      "Review the disk metrics provided. Identify inefficiencies or errors,
+      and suggest improvements."
+    log: |
+      "Analyze the logs provided. Highlight errors, warnings, and unusual
+      activity. Focus on security issues if any."
+    network: |
+      "Examine the network metrics for potential bottlenecks or
+      misconfigurations. Suggest optimizations where necessary."
+

@@ -1,0 +1,284 @@
+# Project Documentation: "i" Command-Line Framework Development
+
+## Outline
+### Project Goals:
+- Develop a modular and extensible command-line tool called "i".
+- Allow users to process various object types (files, URLs, terminal outputs, etc.)
+  using defined actions and interactions.
+- Leverage a YAML-based configuration for defining commands, actions, and
+  intelligent interactions with LLMs.
+- Enable seamless integration of file handling, extraction, conversion,
+  validation, and LLM interaction functionalities.
+
+### Scope:
+- Build a framework capable of handling objects and routing them through
+  configurable actions.
+- Integrate support for text processing, image analysis, PII extraction, network
+  tools, and system diagnostics.
+- Ensure compatibility with structured inputs like JSON and YAML and handle
+  dynamic user input effectively.
+
+### Key Features:
+- **Unified Action Handler**: A centralized handler to manage and route actions
+  based on the configuration.
+- **LLM Interaction**: Interact with LLMs using special syntax (e.g., `:`) for
+  intelligent processing and chaining commands.
+- **Object Identification**: Identify object types (files, URLs, text) and
+  validate their integrity using specialized algorithms.
+- **Extensibility**: Add custom actions, prompts, and interactions through the
+  configuration file.
+
+---
+
+## Requirements
+
+### Functional Requirements:
+- Parse commands and route objects and actions via a YAML-based configuration.
+- Support common object types: files, URLs, terminal output, etc.
+- Provide robust identification and validation of objects using specialized
+  algorithms (`is_file`, `is_url`, `is_email`).
+- Handle advanced actions like extraction of PII, data conversion, and network
+  analysis.
+- Facilitate LLM interactions for summarization, reporting, or detailed analysis.
+- Allow chaining commands and actions using pipes (`|`) or special syntax (`:`).
+- Validate the structure of configuration files and provide clear error messages
+  for misconfigurations.
+
+### Non-Functional Requirements:
+- Ensure high human readability and maintainability of YAML configurations.
+- Design a modular and reusable codebase with minimal dependencies.
+- Support flexibility in object handling and extendability for new object types
+  or actions.
+- Maintain high compatibility with standard shells (bash, zsh, etc.).
+- Ensure efficient performance and low resource overhead.
+
+---
+
+## Key Topics
+### Recurring Ideas:
+- Standardization of command structure (`i <object> <action> <args> : <query>`).
+- Use of YAML as the core configuration format for defining all behavior.
+- Differentiation between objects, actions, and interactions to simplify
+  command processing.
+- Extensibility through modular action classes (e.g., `action_identify.py`,
+  `action_extract.py`).
+
+### Critical Considerations:
+- The role of `:` as a mechanism to route processed data to LLMs for additional
+  interactions.
+- Handling dynamic and static objects differently based on context (e.g.,
+  piped vs. file input).
+- Balancing flexibility for advanced users with simplicity for basic usage.
+
+---
+
+## Concepts/Methodologies
+### Methodologies:
+- **Configuration-Driven Development**: Centralizing functionality definitions
+  in YAML for clarity and extensibility.
+- **Object-Action-Interaction Model**:
+  - **Object**: Source of data (e.g., file, URL).
+  - **Action**: Processor or converter for objects.
+  - **Interaction**: LLM-driven intelligent analysis or additional processing.
+- **Chaining**: Supporting pipelines of actions (`|`) and extended LLM queries (`:`).
+
+### Best Practices:
+- Modular code structure for easy testing and maintenance.
+- YAML configuration adhering to JSON-convertible standards for versatility.
+- Reuse of internal functions (e.g., `action_identify.py`) across modules for
+  consistency.
+
+---
+
+## Actionable Next Steps
+1. Finalize and validate the YAML schema for actions and prompts.
+2. Refactor the `ActionHandler` class to unify actions and interactions.
+3. Implement modular validation functions in `action_identify.py`.
+4. Develop robust extraction logic in `action_extract.py` with support for
+   common PII patterns.
+5. Test edge cases for command parsing, especially with chained actions and LLM
+   interactions.
+6. Document all commands, actions, and prompts with examples in the README.md.
+
+---
+
+## Clarifications Needed
+1. Should additional metadata (e.g., timestamps, source context) be included in
+   LLM interactions?
+2. Are there specific network-related actions or validations (e.g., DNS lookup)
+   to prioritize for `action_network.py`?
+
+---
+
+## Additional Details
+- **Reusable Prompt Format**:
+  - System prompt includes command details and schema.
+  - User input appends additional queries or instructions.
+  - Example:
+    ```
+    Command: i extract email : summarize findings
+    Schema:
+    commands:
+      extract:
+        description: "Extract entities from input."
+        action: ...
+    ```
+
+- **Alignment with Style**:
+  - Focus on human-readable configurations for ease of collaboration.
+  - Modular components ensure scalability for future use cases.
+
+---
+
+## Assistant Findings:
+- Using `:` as a marker for LLM interactions aligns with common CLI practices
+  and is intuitive for users.
+- YAML's flexibility supports easy integration of modular commands and
+  extensibility for future actions.
+- The unified `ActionHandler` simplifies routing and aligns with the
+  configuration-driven methodology.
+- Leveraging the `identify` action for validation ensures high reliability
+  across various object types.
+
+# Project Documentation: "i" CLI Tool
+
+## Outline
+### Project Goals
+- Develop a dynamic, configuration-driven CLI tool (`i`) for handling objects,
+  actions, and interactions with flexibility and extensibility.
+- Provide robust support for various objects (files, URLs, terminal output, etc.)
+  and actions (extract, identify, convert, etc.).
+- Integrate interaction capabilities with LLMs for intelligent processing.
+- Ensure the CLI is modular, extensible, and adheres to Configuration-Driven
+  Development principles.
+
+### Scope
+- Create a modular framework where the `config.yaml` file defines most
+  functionality.
+- Build a core handler (`handler.py`) for routing commands dynamically based on
+  configuration.
+- Support a wide range of objects and actions, with emphasis on extensibility
+  and user-friendliness.
+- Provide dynamic Bash/Zsh completions and detailed validation of user input.
+
+### Key Features
+- Dynamic argument parsing based on configuration.
+- Configurable objects and actions, including LLM-based interactions.
+- Modular action modules for different use cases (e.g., file handling,
+  extraction, conversions).
+- Intelligent object identification and validation.
+
+---
+
+## Requirements
+### Functional Requirements
+- Dynamically parse commands and arguments from `config.yaml`.
+- Support dynamic Bash/Zsh completions via `argcomplete`.
+- Handle objects such as files, URLs, terminal output, and system commands.
+- Support modular actions, including:
+  - `extract`: Extract structured data like emails, URLs, or phone numbers.
+  - `convert`: Convert objects (e.g., file formats).
+  - `identify`: Validate and classify objects.
+- Enable LLM-based interactions with prompts defined in the configuration.
+- Support chaining of actions and LLM interactions via a `:` syntax.
+
+### Non-Functional Requirements
+- Ensure high extensibility through modular architecture.
+- Maintain human-readable configuration format (YAML).
+- Provide meaningful error handling and feedback.
+- Ensure compatibility with major shells (Bash, Zsh, etc.).
+- Optimize for both usability and performance.
+
+---
+
+## Key Topics
+### Recurring Ideas
+- Centrality of the configuration file for defining functionality.
+- Unified object and action processing through a core handler.
+- Flexibility in handling both raw objects and processed data.
+- Extensibility through modular action handlers.
+
+### Critical Considerations
+- Standardizing the syntax for CLI commands and interactions.
+- Balancing simplicity and extensibility in configuration design.
+- Ensuring robust validation of objects and actions.
+
+---
+
+## Concepts/Methodologies
+### Configuration-Driven Development
+- Using `config.yaml` as the single source of truth for functionality.
+- Dynamically building the CLI and routing logic from configuration.
+
+### Modular Design
+- Separation of core (`i.py`, `handler.py`) and action-specific modules.
+- Reuse of object identification and validation logic across modules.
+
+### Best Practices
+- Clear distinction between objects, actions, and interactions.
+- Human-readable YAML configuration for ease of maintenance.
+- Graceful error handling and informative feedback.
+
+---
+
+## Actionable Next Steps
+1. Finalize `i.py` for dynamic parsing and input validation.
+2. Complete `handler.py` for dynamic routing based on configuration.
+3. Implement `action_identify.py` for robust object identification.
+4. Expand `config.yaml` to include comprehensive prompts and actions.
+5. Test the integration of modules with real-world scenarios.
+6. Document usage examples and provide completion scripts.
+
+---
+
+## Clarifications Needed
+- Finalize naming conventions for complex actions or nested prompts.
+- Confirm additional object types and validation requirements for `identify`.
+- Clarify handling of chained commands with multiple `:` interactions.
+
+---
+
+## Additional Details
+### Schema and Structure
+- Configuration file supports modular includes for better management of large
+  prompt/action sets.
+- Dynamic loading of subcommands ensures minimal hardcoding.
+
+### Naming Conventions
+- Objects: Represent sources of data (e.g., files, URLs, system output).
+- Actions: Functions or processes applied to objects (e.g., extract, convert).
+- Interactions: Prompts and intelligent processing via LLMs.
+
+---
+
+## Assistant Findings
+- **Strengths**:
+  - The project aligns with best practices for Configuration-Driven Development.
+  - Modular design ensures scalability and ease of maintenance.
+- **Potential Enhancements**:
+  - Leverage nested YAML configurations for managing extensive prompts.
+  - Provide a library of reusable validation and extraction functions.
+- **Reusable Prompt**:
+"You are a component of the i CLI tool. Your role is to intelligently process data based on the provided configuration. The configuration defines commands, actions, and prompts. You must process inputs based on the schema provided and return actionable results."
+
+---
+
+## Guidelines for Extension
+- New objects or actions can be added by defining them in `config.yaml`.
+- New modules (e.g., `action_osint.py`) can extend functionality without
+modifying core files.
+- Use the modular configuration to enable feature-specific development
+workflows.
+
+
+IMPORTANT:
+To ensure reliable plain text documentation formatting, append the following
+to any prompt:
+
+- Wrap our output in ```plaintext <response> ```
+- Produce output in plain text only; avoid any tags or formatting markers.
+- Use Markdown for structure (e.g., headings, lists), but keep it plain text.
+- Wrap lines at a maximum of 80 characters for readability in text files.
+- Ensure all content can be copied and pasted into a text file without breaking.
+- Avoid introducing special characters or symbols that could break formatting.
+

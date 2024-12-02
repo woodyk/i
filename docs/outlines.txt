@@ -1,0 +1,472 @@
+
+# i Command Framework Documentation
+
+## Overview
+
+The `i` CLI tool provides a flexible, extensible framework for processing and
+interacting with data. It is designed to handle a wide variety of use cases,
+ranging from extracting information from files to engaging with LLMs for
+intelligent interactions.
+
+---
+
+## Core Concepts
+
+### **Object**
+- A source of data, such as files, directories, or command output.
+- Objects do not process, convert, or alter data.
+- Objects do not take arguments.
+- Examples:
+  - `file.txt`
+  - `https://example.com`
+  - Command output: `df -h`
+
+### **Action**
+- A processor or transformation applied to an object.
+- Actions convert, modify, or extract data from objects.
+- Actions can accept arguments to customize behavior.
+- Examples:
+  - `extract`: Extract specific entities (e.g., emails, URLs).
+  - `summarize`: Generate a summary from an object.
+  - `convert`: Convert data from one format to another.
+
+### **Interaction**
+- Engages the LLM for intelligent interaction with objects or their processed
+  results.
+- Triggered by the `:` operator.
+- Combines context from the object, actions, and any user-defined instructions.
+- Examples:
+  - `: Summarize the results`
+  - `: Analyze this data for anomalies`
+
+---
+
+## Command Syntax
+
+### **Basic Syntax**
+1. **Object + Action**
+   ```bash
+   i <object> <action> [<arg1> <arg2> ...]
+   ```
+   - Processes the object using the specified action.
+   - Example:
+     ```bash
+     i file.txt extract email url
+     ```
+
+2. **Object + Interaction**
+   ```bash
+   i <object> : <prompt>
+   ```
+   - Sends the object directly to the LLM for interaction.
+   - Example:
+     ```bash
+     i df : Analyze the disk usage
+     ```
+
+3. **Object + Action + Interaction**
+   ```bash
+   i <object> <action> [<args>] : <prompt>
+   ```
+   - Processes the object using the action, then sends results to the LLM.
+   - Example:
+     ```bash
+     i file.txt extract email : Summarize findings
+     ```
+
+---
+
+### **Advanced Syntax**
+
+1. **Chaining Commands**
+   - Combine multiple `i` commands with pipes (`|`) to create workflows.
+   - Example:
+     ```bash
+     cat file.txt | i extract email : Summarize findings | i summarize :
+     ```
+
+2. **Interaction-Only in Chain**
+   - Process data through actions and then engage with the LLM.
+   - Example:
+     ```bash
+     cat file.txt | i extract email | i : Tell me how many are Gmail
+     ```
+
+---
+
+## Rules and Constraints
+
+- **Command Requirements**:
+  - `object` AND (("action" OR "interaction") OR ("action" AND "interaction"))
+
+- **Valid Examples**:
+  ```bash
+  i <object> :
+  i <object> <action> [<arg1> <arg2>] :
+  <object> | i <action> : <prompt>
+  ```
+
+- **Invalid Example**:
+  ```bash
+  i extract email : # Missing an object
+  ```
+
+---
+
+## Examples of Usage
+
+1. **Basic Extraction**:
+   ```bash
+   i file.txt extract email
+   ```
+
+2. **Extract and Interact**:
+   ```bash
+   i file.txt extract email : Tell me if any emails are from Comcast
+   ```
+
+3. **Chained Commands**:
+   ```bash
+   cat file.txt | i extract email : Are any Gmail? | i summarize :
+   ```
+
+4. **Direct Interaction**:
+   ```bash
+   i df : Analyze disk usage for health concerns
+   ```
+
+### General Objectives:
+1. **Core Components**:
+   - `i.py`: CLI entry point, dynamically builds the CLI based on configuration.
+   - `handler.py`: Routes objects and actions according to the configuration.
+   - Modular action files (`action_extract.py`, `action_convert.py`, etc.).
+   - Configuration files (`config.yaml`, `actions.yaml`, `prompts.yaml`).
+
+2. **Configuration-Driven**:
+   - The tool relies heavily on `config.yaml` and supplemental YAML files to define supported actions, arguments, and prompts.
+
+3. **Object and Action Structure**:
+   - Objects: Input data sources like files, URLs, or raw text.
+   - Actions: Processes applied to objects, which may be function-based or AI-based.
+   - Interaction Trigger: The use of `:` indicates a prompt or additional query is passed to an AI.
+
+4. **Dynamic Behavior**:
+   - CLI arguments and functionality adapt based on the configuration.
+   - Actions can perform basic operations or leverage AI for intelligent tasks.
+
+### Current Files:
+1. **i.py**:
+   - Parses arguments dynamically from `config.yaml`.
+   - Routes input to `Handler` for processing.
+
+2. **handler.py**:
+   - Core logic for identifying objects and routing actions.
+   - Dynamically imports and executes action modules based on the configuration.
+
+3. **config.yaml**:
+   - Central configuration defining paths, logging, LLM parameters, and default behavior.
+
+4. **actions.yaml**:
+   - Defines all supported actions, their descriptions, argument requirements, and types.
+
+5. **prompts.yaml**:
+   - Stores default and action-specific prompts for interaction with the AI.
+
+### Expectations for the Next Steps:
+1. Reconstruct and refine all mentioned files to be ready for integration testing.
+2. Ensure robust error handling and seamless modularity.
+3. Start a new session by pasting this prompt and the reconstructed files.
+
+You can find the code and configurations below.
+
+# Expectations and Functionality for the `i` Command-Line Tool
+
+## Overview
+The `i` tool is designed to be a versatile, modular, and intelligent CLI
+for processing and interacting with various data types. It combines system
+utilities with AI-enhanced functionalities to create an extensible
+framework that simplifies data handling, analysis, and transformation.
+
+## Key Expectations
+1. **Modularity and Extensibility**:
+    - Use a YAML-based configuration for defining objects, actions, and
+      interactions.
+    - Allow seamless addition of new actions, objects, and AI interactions
+      without modifying the core framework.
+
+2. **Object-Action-Interaction Model**:
+    - Clearly distinguish between objects (data sources), actions
+      (processes or transformations), and interactions (AI-driven analysis
+      or insights).
+    - Ensure consistent syntax for CLI operations: `<object> <action>
+      [<args>] : <interaction>`.
+
+3. **Error Handling and Validation**:
+    - Provide meaningful and clear error messages for invalid commands,
+      misconfigured YAML, or unsupported features.
+    - Implement robust object validation to identify and handle data types
+      like files, URLs, and system outputs.
+
+4. **Advanced Use Cases**:
+    - Support chaining of commands with `|` and AI-powered interactions
+      with `:`.
+    - Enable processing of piped input and dynamic user queries.
+
+## Functionality Requirements
+1. **Object Handling**:
+    - Validate and identify input objects, whether files, URLs, or raw
+      piped data.
+    - Provide metadata (e.g., type, structure, content details) for objects.
+
+2. **Action Capabilities**:
+    - Implement core actions such as `extract`, `convert`, `identify`,
+      and `diagnose`.
+    - Allow action arguments to customize behavior (e.g., entity type for
+      extraction).
+
+3. **AI-Enhanced Interactions**:
+    - Use the `:` syntax to send processed data to the AI with user-defined
+      prompts.
+    - Include default and example prompts in the configuration for common
+      use cases (e.g., summarization, anomaly detection).
+
+4. **Command Syntax and Features**:
+    - Support basic commands like:
+      ```
+      i <object> <action> [<args>]
+      ```
+    - Enable advanced features like:
+      ```
+      i <object> <action> [<args>] : <interaction>
+      ```
+      or chaining:
+      ```
+      <object> | i <action> : <interaction> | i <action>
+      ```
+
+## Output Expectations
+- Provide human-readable results by default, with options for structured
+  output formats (e.g., JSON, YAML).
+- Include clear summaries and actionable insights for AI interactions.
+
+## Performance and Compatibility
+- Optimize for low overhead and fast processing of large datasets.
+- Ensure compatibility with major shells (e.g., Bash, Zsh) and common
+  environments.
+
+## Conclusion
+The `i` CLI tool should deliver a robust and intuitive experience for users
+by combining modular, configuration-driven design with AI-enhanced
+capabilities. The framework must be extensible, user-friendly, and capable
+of handling a wide range of technical use cases efficiently.
+
+# Comprehensive Technical Guide for the `i` Command-Line Tool
+
+## 1. Overview
+
+The `i` CLI tool is a modular, configuration-driven framework for processing
+and interacting with diverse data types. By integrating traditional
+command-line utilities with AI capabilities, it bridges system-level
+operations and intelligent data analysis. This guide provides a detailed
+breakdown of the software's design, modularity, and technical implementation
+principles.
+
+## 2. Project Vision and Goals
+
+### Vision
+Create a versatile and extensible CLI tool to:
+- Process diverse data types (files, URLs, command outputs).
+- Apply configurable transformations and analyses.
+- Enable AI-driven interactions for intelligent processing.
+
+### Goals
+- **Modularity**: Simplify the addition of new functionality via
+  self-contained modules.
+- **Configuration-Driven Design**: Allow non-technical users to modify
+  tool behavior via YAML configurations.
+- **Extensibility**: Support custom actions, objects, and AI interactions.
+- **Ease of Use**: Deliver an intuitive interface for both basic and
+  advanced users.
+
+## 3. Key Features
+
+### Object-Action-Interaction Model
+- **Object**: Data source to be processed.
+  - Examples: File paths, URLs, piped input, system commands.
+- **Action**: Transformation or processing function.
+  - Examples: `extract`, `convert`, `identify`, `diagnose`.
+- **Interaction**: AI-powered query or insight triggered by `:`.
+  - Examples: Summarizing extracted data, diagnosing system logs.
+
+### Command Syntax
+1. Basic Command:
+   ```
+   i <object> <action> [<args>]
+   ```
+   Example: `i file.txt extract email`
+2. Interaction Command:
+   ```
+   i <object> : <prompt>
+   ```
+   Example: `i df : Analyze disk usage`
+3. Combined Command:
+   ```
+   i <object> <action> [<args>] : <prompt>
+   ```
+   Example: `i file.txt extract email : Summarize findings`
+4. Chained Command:
+   ```
+   <object> | i <action> : <interaction> | i <action>
+   ```
+   Example: `cat file.txt | i extract email : categorize domains`
+
+### Modular Action Design
+- Each action is implemented as a Python module (e.g., `action_extract.py`).
+- Actions are dynamically loaded and routed through `handler.py`.
+- YAML configurations define the arguments, behavior, and associated
+  functions for each action.
+
+### AI Integration
+- AI interactions use predefined and user-modifiable prompts.
+- Prompts are stored in `prompts.yaml` for modularity.
+- Example prompts:
+  - Default: `"Extract {entity} from the input and summarize."`
+  - Custom: `"Analyze system logs for security issues."`
+
+## 4. System Design and Components
+
+### Configuration-Driven Development
+- Centralized configurations control behavior (`config.yaml`).
+- Additional configurations include:
+  - `actions.yaml`: Defines supported actions and their arguments.
+  - `prompts.yaml`: Stores default and example AI prompts.
+
+### Core Components
+1. **`i.py` (Entry Point)**:
+   - Parses user commands and detects piped input.
+   - Routes objects and actions to `handler.py`.
+   - Example functionality:
+     - Read object type (`file`, `URL`).
+     - Validate action compatibility.
+
+2. **`handler.py` (Core Logic)**:
+   - Loads configurations dynamically.
+   - Validates object-action combinations.
+   - Routes execution to the appropriate module.
+
+3. **Action Modules**:
+   - Self-contained Python scripts implementing specific actions.
+   - Examples:
+     - `action_extract.py`: Extract structured data (emails, URLs).
+     - `action_identify.py`: Validate and identify object types.
+     - `action_network.py`: Handle URLs, domains, and network data.
+
+4. **Configuration Files**:
+   - `config.yaml`:
+     - Centralized control over tool behavior and settings.
+   - `actions.yaml`:
+     - Defines actions, arguments, and corresponding functions.
+   - `prompts.yaml`:
+     - Stores AI interaction templates.
+
+## 5. Technical Implementation
+
+### Object Processing
+- **Validation**: Objects are validated for compatibility with actions.
+  - Example: A `.txt` file can support `extract`, but a URL may not.
+- **Metadata Extraction**:
+  - Identify MIME types, structure, and properties.
+  - Return details like content type, size, and format.
+
+### Action Handling
+- Actions are defined as Python functions in their respective modules.
+- The configuration file specifies:
+  - Function to call (e.g., `extract_entities`).
+  - Required arguments and their types.
+  - Allowed values for arguments (e.g., `entity: [email, URL, phone]`).
+
+### AI Interactions
+- The `:` operator triggers AI-based processing.
+- Workflow:
+  1. Process the object with the specified action.
+  2. Combine results with the user-defined prompt.
+  3. Send combined input to the AI for analysis.
+- Example:
+  - Command: `i file.txt extract email : Summarize findings`
+  - Process:
+    - Extract emails → Send to AI with "Summarize findings."
+
+### Command Chaining
+- Pipes (`|`) and interactions (`:`) allow complex workflows.
+- Example:
+  - Input: `cat file.pdf | i extract email : summarize | i save report.txt`
+  - Output:
+    - Extract emails from `file.pdf`.
+    - Summarize findings via AI.
+    - Save results to `report.txt`.
+
+## 6. Error Handling and Validation
+
+### Validation Steps
+- Object Validation:
+  - Check MIME type and structure.
+  - Example: `action_identify.py` returns `{"type": "text", "format": "csv"}`.
+- Action Validation:
+  - Ensure object-action compatibility.
+  - Example: `.txt` files cannot be passed to a `diagnose` action.
+
+### Error Messaging
+- Graceful degradation with clear feedback.
+- Example Errors:
+  - Missing object: `"Error: No object specified."`
+  - Invalid action: `"Error: Action 'diagnose' not supported for 'file.txt'."`
+  - Misconfigured YAML: `"Error: Invalid syntax in 'actions.yaml'."`
+
+## 7. Performance and Compatibility
+
+### Performance Optimization
+- Minimize memory usage by processing objects as streams when possible.
+- Use lightweight libraries for regex, MIME type detection, and text
+  processing.
+
+### Shell Compatibility
+- Tested for Bash, Zsh, and other major shells.
+- Supports dynamic completions via `argcomplete`.
+
+## 8. Future Enhancements
+
+- **New Object Types**:
+  - Add support for multimedia (e.g., audio, video).
+- **Enhanced AI Features**:
+  - Enable multi-step prompt chains.
+  - Add contextual metadata to interactions.
+- **Extended Validation**:
+  - Perform DNS lookups for extracted emails or URLs.
+- **User-Customized Actions**:
+  - Allow users to define custom Python scripts as actions.
+
+## 9. Summary
+
+The `i` CLI tool is a powerful, extensible framework for data processing and
+intelligent interactions. Its modular design, configuration-driven
+development, and user-centric features ensure scalability, maintainability,
+and ease of use. By leveraging the object-action-interaction model, it
+empowers users to handle diverse technical scenarios with efficiency and
+clarity.
+
+IMPORTANT:
+To ensure reliable plain text documentation formatting, append the following
+to any prompt:
+
+- Produce output in plain text only; avoid any tags or formatting markers.
+- Use Markdown for structure (e.g., headings, lists), but keep it plain text.
+- Wrap lines at a maximum of 80 characters for readability in text files.
+- Ensure all content can be copied and pasted into a text file without breaking.
+- Avoid introducing special characters or symbols that could break formatting.
+- Wrap our output in ```markdown\n<content>```
+Example formatting for documents:
+```markdown
+"""
+    <content>
+"""
+```

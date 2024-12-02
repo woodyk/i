@@ -1,0 +1,64 @@
+actions:
+  - name: "identify"
+    type: "function"
+    module: "action_identify"
+    function: "identify_object"
+    description: "Identify object types."
+    prompt: |
+      "Default action prompt for working with data from this action."
+    examples:
+      - "returns object type"
+      - "i file.txt identify"
+      - "cat file.txt | i identify"
+
+  - name: "extract"
+    type: "function"
+    module: "action_extract"
+    function: "extract_entities"
+    description: "Extract specific patterns or entities from data."
+    prompt: |
+      "Default action prompt for extracting data."
+    args:
+      - name: "entities"
+        required: false
+        prompt: |
+          "A list of entity types you want to extract from the object."
+        help: "Target entity types."
+    examples:
+      - "i file.txt extract email phone"
+      - "cat file.txt | i extract url"
+
+  - name: "convert"
+    type: "function"
+    module: "action_convert"
+    function: "convert_data"
+    description: "Convert data from one format to another."
+    prompt: |
+      "Default action prompt for converting data."
+    args:
+      - name: "format"
+        required: true
+        prompt: |
+          "Specify the target format (e.g., csv, json)."
+        help: "Target format for conversion (e.g., csv)."
+    examples:
+      - "i file.txt convert csv"
+      - "cat file.txt | i convert csv"
+
+  - name: "diagnose"
+    type: "interaction"
+    module: "action_diagnose"
+    function: "diagnose"
+    description: "Perform diagnostics and intelligent analysis."
+    prompt: |
+      "Default action prompt for diagnostics."
+    args:
+      - name: "area"
+        required: false
+        prompt: |
+          "Specific diagnostic area (e.g., disk, logs)."
+        help: "Area to diagnose (e.g., disk, logs, network)."
+    examples:
+      - "i system diagnose disk"
+      - "cat logs.txt | i diagnose logs"
+
