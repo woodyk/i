@@ -5,7 +5,7 @@
 # Author: Wadih Khairallah
 # Description: Dynamic CLI tool powered by configuration
 # Created: 2024-12-01 17:19:19
-# Modified: 2024-12-01 23:58:23
+# Modified: 2024-12-03 17:38:23
 
 import os
 import sys
