@@ -5,7 +5,11 @@
 # Author: Wadih Khairallah
 # Description: 
 # Created: 2024-12-01 18:34:42
-# Modified: 2024-12-01 23:39:11
+# Modified: 2024-12-02 01:54:32
+
+import re
+import sys
+import json
 
 def extract_entities(input_data, *entities):
     """
@@ -19,4 +23,3 @@ def extract_entities(input_data, *entities):
         str: Dummy result for testing.
     """
     return f"Extracted {entities} from input data: {input_data[:50]}..."
-
